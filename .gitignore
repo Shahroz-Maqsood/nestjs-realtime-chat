@@ -1,0 +1,28 @@
+# Dependencies
+node_modules
+yarn.lock
+package-lock.json
+
+# IDE
+.idea
+.vscode
+
+# Build
+build
+coverage
+dist
+
+# Logs
+logs
+
+# Environment
+.env
+.env.example
+
+# Docker
+docker-compose.yml
+docker-compose.override.yml
+
+# Other
+.DS_Store
+Thumbs.db
