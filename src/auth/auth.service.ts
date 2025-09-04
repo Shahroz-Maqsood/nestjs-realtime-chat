@@ -5,7 +5,7 @@ import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private users: UsersService, private jwt: JwtService) {}
+  constructor(private users: UsersService, private jwt: JwtService) { }
 
   async signup(email: string, name: string, password: string) {
     const user = await this.users.create({ email, name, password });

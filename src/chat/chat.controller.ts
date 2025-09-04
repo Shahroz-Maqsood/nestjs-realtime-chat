@@ -8,7 +8,7 @@ import { ChatService } from './chat.service';
 @UseGuards(JwtAuthGuard)
 @Controller('chat')
 export class ChatController {
-  constructor(private chat: ChatService) {}
+  constructor(private chat: ChatService) { }
 
   @Get('rooms/:roomId/history')
   history(

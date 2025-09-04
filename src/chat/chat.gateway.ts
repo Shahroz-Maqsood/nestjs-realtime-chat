@@ -1,4 +1,5 @@
 import { UseGuards } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   ConnectedSocket,
   MessageBody,
@@ -7,6 +8,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { WsJwtGuard } from '../common/guards/ws-jwt.guard';
@@ -25,7 +27,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private chat: ChatService,
     private users: UsersService,
     private rooms: RoomsService,
+    private jwtService: JwtService,
   ) { }
+
+  afterInit(server: Server) {
+    server.use((socket: Socket, next) => {
+      const token = socket.handshake.auth.token;
+      if (!token) {
+        return next(new WsException('Authentication error: token missing'));
+      }
+
+      try {
+        const jwt = token.startsWith('Bearer ') ? token.slice(7) : token;
+        const payload = this.jwtService.verify(jwt);
+        socket.data.user = payload;
+        next();
+      } catch (err) {
+        return next(new WsException('Authentication error: invalid token'));
+      }
+    });
+  }
 
   async handleConnection(client: Socket) {
     const userId = (client.data.user as JwtPayload).sub as string;
@@ -82,5 +103,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     else set.delete(user.sub);
     this.typingUsers.set(roomId, set);
     client.to(roomId).emit('typing', { roomId, userId: user.sub, isTyping });
+    return { ok: true };
   }
 }

@@ -5,7 +5,7 @@ import { Message, MessageDocument } from './message.schema';
 
 @Injectable()
 export class ChatService {
-  constructor(@InjectModel(Message.name) private msgModel: Model<MessageDocument>) {}
+  constructor(@InjectModel(Message.name) private msgModel: Model<MessageDocument>) { }
 
   async saveMessage(roomId: string, userId: string, content: string) {
     const msg = new this.msgModel({
@@ -18,7 +18,7 @@ export class ChatService {
 
   getHistory(roomId: string, limit = 50, skip = 0) {
     return this.msgModel
-      .find({ room: roomId })
+      .find({ room: new Types.ObjectId(roomId) })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RoomsModule } from '../rooms/rooms.module';
@@ -10,7 +11,14 @@ import { Message, MessageSchema } from './message.schema';
 
 @Module({
   imports: [
-    JwtModule.register({}), // used by WsJwtGuard via DI in gateway context
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get('JWT_SECRET'),
+        signOptions: { expiresIn: config.get('JWT_EXPIRES_IN') || '1d' },
+      }),
+    }),
     UsersModule,
     RoomsModule,
     MongooseModule.forFeature([{ name: Message.name, schema: MessageSchema }]),
